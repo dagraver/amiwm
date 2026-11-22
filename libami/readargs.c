@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdint.h>
 
 #ifdef AMIGAOS
 
@@ -35,7 +36,7 @@ static void addquoted(const char *arg)
   while((ch=*arg++)) switch(ch) {
   case '\n': addachar('*'); addachar('N'); break;
   case '\"': addachar('*'); addachar('\"'); break;
-  case '*': addachar(ch);
+  case '*': addachar(ch); /* fall through */
   default: addachar(ch);
   }
   addachar('"');
@@ -132,7 +133,7 @@ static UBYTE * ra_realloc(struct RDArgs *rdargs, UBYTE **start, UBYTE **end)
 
 static LONG CS_ReadChar(struct CSource *cSource)
 {
-  if(!cSource || ((LONG)cSource)==-1 || !cSource->CS_Buffer) {
+  if(!cSource || ((intptr_t)cSource)==-1 || !cSource->CS_Buffer) {
     if(cmdline && *cmdline) {
       return (unsigned char)(*cmdline++);
     } else
@@ -145,7 +146,7 @@ static LONG CS_ReadChar(struct CSource *cSource)
 
 static void CS_UnReadChar(struct CSource *cSource, UBYTE ch)
 {
-  if(!cSource || ((LONG)cSource)==-1 || !cSource->CS_Buffer) {
+  if(!cSource || ((intptr_t)cSource)==-1 || !cSource->CS_Buffer) {
     if(cmdline && *cmdline)
       --cmdline;
     else
@@ -229,11 +230,12 @@ LONG FindArg(STRPTR template, STRPTR keyword)
       ch=*template++;
       if(!ch)
         return (kwindex == kwlen? argindex : -1);
-      if(ch == ',' || ch == '=' || ch == '/')
+      if(ch == ',' || ch == '=' || ch == '/') {
         if(kwindex == kwlen)
           return argindex;
         else
           break;
+      }
     } while(ToUpper(ch) == ToUpper(keyword[kwindex++]));
 
     while(ch != '=') {
@@ -353,7 +355,7 @@ struct RDArgs * ReadArgs(STRPTR template, LONG *array, struct RDArgs *rdargs)
       while(numargs-->0) {
         int isnumeric=0;
 
-        if((*swptr)&RA_MULTI)
+        if((*swptr)&RA_MULTI) {
 	  if(multinum) {
 	    ((Argtype *)array)->ptr=ra_alloc(rdargs,
 					     sizeof(Argtype)*(multinum+1));
@@ -365,6 +367,7 @@ struct RDArgs * ReadArgs(STRPTR template, LONG *array, struct RDArgs *rdargs)
             isnumeric=((*swptr)&RA_NUMERIC)!=0;
           }
 	  else ((Argtype *)array)->ptr=NULL;
+        }
         array=(LONG*)(((Argtype *)array)+1);
         if(!((sw=*swptr++)&RA_FOUND) && (sw&RA_ALWAYS)) {
           if((!lastmarg) || (sw&RA_KEYWORD) || multinum<2 ||
@@ -437,7 +440,7 @@ not_namedarg:
       }
 quoted2:
       CS_UnReadChar((struct CSource *)rdargs, ch);
-
+      /* fall through */
 quoted:
     case ITEM_QUOTED:
       if(argnum<0) {
@@ -464,7 +467,7 @@ quoted:
       sw=switches[argnum];
       switches[argnum]|=RA_FOUND;
       if(!rdargs) {
-        ((Argtype *)array)[argnum].num=((LONG)start)>>2;
+        ((Argtype *)array)[argnum].num=((LONG)(intptr_t)start)>>2;
         start+=((*start)&~3)+4;
         continue;
       }
@@ -494,13 +497,13 @@ quoted:
       } else if(sw&RA_NUMERIC) {
         LONG n; int len;
 numeric:
-        if((len=StrToLong(start, &n))<=0 || len!=strlen((char *)start)) {
+        if((len=StrToLong(start, &n))<=0 || len!=(int)strlen((char *)start)) {
 	  error=ERROR_BAD_NUMBER;
 	  goto fail;
         }
 	start+=sizeof(Argtype)-1;
-	start-=((LONG)start)&(sizeof(Argtype)-1);
-        if(end-start<sizeof(LONG))
+	start-=((intptr_t)start)&(sizeof(Argtype)-1);
+        if(end-start<(ptrdiff_t)sizeof(LONG))
 	  if(!ra_realloc(rdargs, &start, &end))
 	    goto nomemfail;
         *(LONG *)start=n;

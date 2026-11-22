@@ -62,6 +62,7 @@ Pixmap image_to_pixmap(Display *dpy, Window win, GC gc, unsigned long bg,
       transp = -1;
     if(!(flags&2))
       ncolors = 0;
+    (void)transp; /* transparency not yet implemented */
     memset(ic, 0, sizeof(ic));
     if(!ncolors) {
       if(cs) cs->colors = NULL;

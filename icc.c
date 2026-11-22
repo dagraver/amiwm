@@ -6,6 +6,7 @@
 #include "prefs.h"
 
 #include <string.h>
+#include <stdlib.h>
 
 #ifdef AMIGAOS
 #include <pragmas/xlib_pragmas.h>
@@ -129,7 +130,7 @@ static int stylematch_low(char *p, int l, char *m)
   --m;
   do {
     lf = strchr(++m, '\n');
-    ml = (lf? lf-m:strlen(m));
+    ml = (lf? (int)(lf-m):(int)strlen(m));
     if(ml == l && !strncmp(m, p, ml))
       return 1;
   } while((m=lf));
@@ -267,7 +268,7 @@ void handle_client_message(Client *c, XClientMessageEvent *xcme)
 	  XMapWindow(dpy, c->icon->labelwin);
 	c->icon->mapped=1;
 	setclientstate(c, IconicState);
-      } else ;
+      } else { }
     else
       if(c->state==IconicState && c->icon) {
 	Icon *i=c->icon;

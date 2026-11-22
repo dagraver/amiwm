@@ -226,7 +226,7 @@ void create_module(Scrn *screen, char *module_name, char *module_arg)
 	if(pid<0)
 	  perror("fork");
 	else {
-	  m=calloc(sizeof(struct module),1);
+	  m=calloc(1,sizeof(struct module));
 	  m->pid=pid;
 	  m->in_fd=fds2[0];
 	  m->out_fd=fds1[1];
@@ -267,11 +267,12 @@ static int m_write(int fd, char *ptr, int len)
   char *p=ptr;
   int r, tot=0;
   while(len>0) {
-    if((r=write(fd, p, len))<0)
+    if((r=write(fd, p, len))<0) {
       if(errno==EINTR)
 	continue;
       else
 	return r;
+    }
     if(!r)
       return tot;
     tot+=r;
@@ -308,7 +309,7 @@ int dispatch_event_to_broker(XEvent *e, unsigned long mask, struct module *m)
       struct mcmd_event me;
       me.mask=mask;
       me.event=*e;
-      reply_module(m, (char *)&me, ~sizeof(me));
+      reply_module(m, (char *)&me, ~(int)sizeof(me));
       return 1;
     }
     m=m->next;
@@ -346,14 +347,14 @@ static void handle_module_cmd(struct module *m, char *data, int data_len)
     reply_module(m, "amiwm "VERSION, sizeof("amiwm "VERSION));
     break;
   case MCMD_SEND_EVENT:
-    if(data_len>=sizeof(struct mcmd_event)) {
+    if(data_len>=(int)sizeof(struct mcmd_event)) {
       incoming_event(m, (struct mcmd_event *)data);
       reply_module(m, NULL, 0);
     } else 
       reply_module(m, NULL, -1);
     break;
   case MCMD_SET_BROKER:
-    if(data_len>=sizeof(m->broker.mask)) {
+    if(data_len>=(int)sizeof(m->broker.mask)) {
       m->broker.mask=*(unsigned long *)data;
       m->broker.exists=1;
       reply_module(m, NULL, 0);
@@ -366,13 +367,13 @@ static void handle_module_cmd(struct module *m, char *data, int data_len)
     reply_module(m, NULL, 0);
     break;
   case MCMD_ADD_KEYGRAB:
-    if(data_len>=sizeof(int[2])) {
+    if(data_len>=(int)sizeof(int[2])) {
       int res=create_keygrab(m, ((int*)data)[0], ((int*)data)[1]);
       reply_module(m, (char *)&res, sizeof(res));
     } else reply_module(m, NULL, -1);
     break;
   case MCMD_DEL_KEYGRAB:
-    if(data_len>=sizeof(int)) {
+    if(data_len>=(int)sizeof(int)) {
       delete_keygrab(m, ((int*)data)[0]);
       reply_module(m, NULL, 0);
     } else reply_module(m, NULL, -1);
@@ -408,7 +409,7 @@ static void handle_module_cmd(struct module *m, char *data, int data_len)
       reply_module(m, NULL, -1);
     break;
   case MCMD_CREATEAPPICON:
-    if(data_len>=sizeof(struct NewAppIcon)) {
+    if(data_len>=(int)sizeof(struct NewAppIcon)) {
       struct NewAppIcon *nai=(struct NewAppIcon *)data;
       Window w=None;
       Icon *i=createappicon(m, id, nai->name,
@@ -457,7 +458,7 @@ static void handle_module_cmd(struct module *m, char *data, int data_len)
 		 (iconcolormask+1)*sizeof(unsigned long));
     break;
   case MCMD_MANAGEMENU:
-    if(data_len>=sizeof(int[3])) {
+    if(data_len>=(int)sizeof(int[3])) {
       struct Item *i;
       scr=getscreen(id);
       if((i=own_items(m, scr, ((int*)data)[0], ((int*)data)[1],
@@ -506,7 +507,7 @@ static void module_input_callback(struct module *m)
     int t=(r>m->in_left? m->in_left:r);
     memcpy(m->in_ptr, p, t);
     m->in_ptr+=t;
-    if(!(m->in_left-=t))
+    if(!(m->in_left-=t)) {
       if(m->in_phase || ((!m->mcmd.len)&&(m->in_ptr=m->in_buf))) {
 	*m->in_ptr=0;
 	handle_module_cmd(m, m->in_buf, m->mcmd.len);
@@ -516,14 +517,14 @@ static void module_input_callback(struct module *m)
       } else {
 	if(m->mcmd.len>=m->in_buf_size) {
 	  if((m->in_buf_size<<=1)<=m->mcmd.len)
-	    m->in_buf_size=m->mcmd.len+1; {
+	    m->in_buf_size=m->mcmd.len+1;
 	  m->in_buf=realloc(m->in_buf, m->in_buf_size);
-	  }
 	}
 	m->in_ptr=m->in_buf;
 	m->in_left=m->mcmd.len;
 	m->in_phase++;
       }
+    }
     p+=t;
     r-=t;
   }

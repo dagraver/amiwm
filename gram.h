@@ -1,8 +1,9 @@
-/* A Bison parser, made by GNU Bison 3.0.4.  */
+/* A Bison parser, made by GNU Bison 3.8.2.  */
 
 /* Bison interface for Yacc-like parsers in C
 
-   Copyright (C) 1984, 1989-1990, 2000-2015 Free Software Foundation, Inc.
+   Copyright (C) 1984, 1989-1990, 2000-2015, 2018-2021 Free Software Foundation,
+   Inc.
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -15,7 +16,7 @@
    GNU General Public License for more details.
 
    You should have received a copy of the GNU General Public License
-   along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
+   along with this program.  If not, see <https://www.gnu.org/licenses/>.  */
 
 /* As a special exception, you may create a larger work that contains
    part or all of the Bison parser skeleton and distribute that work
@@ -30,6 +31,10 @@
    This special exception was added by the Free Software Foundation in
    version 2.2 of Bison.  */
 
+/* DO NOT RELY ON FEATURES THAT ARE NOT DOCUMENTED in the manual,
+   especially those whose name start with YY_ or yy_.  They are
+   private implementation details that can be changed or removed.  */
+
 #ifndef YY_YY_Y_TAB_H_INCLUDED
 # define YY_YY_Y_TAB_H_INCLUDED
 /* Debug traces.  */
@@ -40,74 +45,83 @@
 extern int yydebug;
 #endif
 
-/* Token type.  */
+/* Token kinds.  */
 #ifndef YYTOKENTYPE
 # define YYTOKENTYPE
   enum yytokentype
   {
-    ERRORTOKEN = 258,
-    LEFTBRACE = 259,
-    RIGHTBRACE = 260,
-    YES = 261,
-    NO = 262,
-    RIGHT = 263,
-    BOTTOM = 264,
-    BOTH = 265,
-    NONE = 266,
-    MAGICWB = 267,
-    SYSTEM = 268,
-    SCHWARTZ = 269,
-    ALWAYS = 270,
-    AUTO = 271,
-    MANUAL = 272,
-    SEPARATOR = 273,
-    T_DETAILPEN = 274,
-    T_BLOCKPEN = 275,
-    T_TEXTPEN = 276,
-    T_SHINEPEN = 277,
-    T_SHADOWPEN = 278,
-    T_FILLPEN = 279,
-    T_FILLTEXTPEN = 280,
-    T_BACKGROUNDPEN = 281,
-    T_HIGHLIGHTTEXTPEN = 282,
-    T_BARDETAILPEN = 283,
-    T_BARBLOCKPEN = 284,
-    T_BARTRIMPEN = 285,
-    FASTQUIT = 286,
-    SIZEBORDER = 287,
-    DEFAULTICON = 288,
-    ICONDIR = 289,
-    ICONPALETTE = 290,
-    SCREENFONT = 291,
-    ICONFONT = 292,
-    TOOLITEM = 293,
-    FORCEMOVE = 294,
-    SCREEN = 295,
-    MODULE = 296,
-    MODULEPATH = 297,
-    INTERSCREENGAP = 298,
-    AUTORAISE = 299,
-    FOCUS = 300,
-    FOLLOWMOUSE = 301,
-    CLICKTOTYPE = 302,
-    SLOPPY = 303,
-    CUSTOMICONSONLY = 304,
-    TITLEBARCLOCK = 305,
-    TITLECLOCKFORMAT = 306,
-    OPAQUEMOVE = 307,
-    OPAQUERESIZE = 308,
-    SCREENMENU = 309,
-    STYLE = 310,
-    CLASS = 311,
-    TITLE = 312,
-    ICONTITLE = 313,
-    ICON = 314,
-    SHORTLABELICONS = 315,
-    STRING = 316,
-    NUMBER = 317
+    YYEMPTY = -2,
+    YYEOF = 0,                     /* "end of file"  */
+    YYerror = 256,                 /* error  */
+    YYUNDEF = 257,                 /* "invalid token"  */
+    ERRORTOKEN = 258,              /* ERRORTOKEN  */
+    LEFTBRACE = 259,               /* LEFTBRACE  */
+    RIGHTBRACE = 260,              /* RIGHTBRACE  */
+    YES = 261,                     /* YES  */
+    NO = 262,                      /* NO  */
+    RIGHT = 263,                   /* RIGHT  */
+    BOTTOM = 264,                  /* BOTTOM  */
+    BOTH = 265,                    /* BOTH  */
+    NONE = 266,                    /* NONE  */
+    MAGICWB = 267,                 /* MAGICWB  */
+    SYSTEM = 268,                  /* SYSTEM  */
+    SCHWARTZ = 269,                /* SCHWARTZ  */
+    ALWAYS = 270,                  /* ALWAYS  */
+    AUTO = 271,                    /* AUTO  */
+    MANUAL = 272,                  /* MANUAL  */
+    SEPARATOR = 273,               /* SEPARATOR  */
+    T_DETAILPEN = 274,             /* T_DETAILPEN  */
+    T_BLOCKPEN = 275,              /* T_BLOCKPEN  */
+    T_TEXTPEN = 276,               /* T_TEXTPEN  */
+    T_SHINEPEN = 277,              /* T_SHINEPEN  */
+    T_SHADOWPEN = 278,             /* T_SHADOWPEN  */
+    T_FILLPEN = 279,               /* T_FILLPEN  */
+    T_FILLTEXTPEN = 280,           /* T_FILLTEXTPEN  */
+    T_BACKGROUNDPEN = 281,         /* T_BACKGROUNDPEN  */
+    T_HIGHLIGHTTEXTPEN = 282,      /* T_HIGHLIGHTTEXTPEN  */
+    T_BARDETAILPEN = 283,          /* T_BARDETAILPEN  */
+    T_BARBLOCKPEN = 284,           /* T_BARBLOCKPEN  */
+    T_BARTRIMPEN = 285,            /* T_BARTRIMPEN  */
+    FASTQUIT = 286,                /* FASTQUIT  */
+    SIZEBORDER = 287,              /* SIZEBORDER  */
+    DEFAULTICON = 288,             /* DEFAULTICON  */
+    ICONDIR = 289,                 /* ICONDIR  */
+    ICONPALETTE = 290,             /* ICONPALETTE  */
+    SCREENFONT = 291,              /* SCREENFONT  */
+    ICONFONT = 292,                /* ICONFONT  */
+    TOOLITEM = 293,                /* TOOLITEM  */
+    FORCEMOVE = 294,               /* FORCEMOVE  */
+    SCREEN = 295,                  /* SCREEN  */
+    MODULE = 296,                  /* MODULE  */
+    MODULEPATH = 297,              /* MODULEPATH  */
+    INTERSCREENGAP = 298,          /* INTERSCREENGAP  */
+    AUTORAISE = 299,               /* AUTORAISE  */
+    FOCUS = 300,                   /* FOCUS  */
+    FOLLOWMOUSE = 301,             /* FOLLOWMOUSE  */
+    CLICKTOTYPE = 302,             /* CLICKTOTYPE  */
+    SLOPPY = 303,                  /* SLOPPY  */
+    CUSTOMICONSONLY = 304,         /* CUSTOMICONSONLY  */
+    TITLEBARCLOCK = 305,           /* TITLEBARCLOCK  */
+    TITLECLOCKFORMAT = 306,        /* TITLECLOCKFORMAT  */
+    OPAQUEMOVE = 307,              /* OPAQUEMOVE  */
+    OPAQUERESIZE = 308,            /* OPAQUERESIZE  */
+    SCREENMENU = 309,              /* SCREENMENU  */
+    STYLE = 310,                   /* STYLE  */
+    CLASS = 311,                   /* CLASS  */
+    TITLE = 312,                   /* TITLE  */
+    ICONTITLE = 313,               /* ICONTITLE  */
+    ICON = 314,                    /* ICON  */
+    SHORTLABELICONS = 315,         /* SHORTLABELICONS  */
+    STRING = 316,                  /* STRING  */
+    NUMBER = 317                   /* NUMBER  */
   };
+  typedef enum yytokentype yytoken_kind_t;
 #endif
-/* Tokens.  */
+/* Token kinds.  */
+#define YYEMPTY -2
+#define YYEOF 0
+#define YYerror 256
+#define YYUNDEF 257
 #define ERRORTOKEN 258
 #define LEFTBRACE 259
 #define RIGHTBRACE 260
@@ -171,17 +185,16 @@ extern int yydebug;
 
 /* Value type.  */
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
-
 union YYSTYPE
 {
-#line 50 "gram.y" /* yacc.c:1909  */
+#line 52 "gram.y"
 
     int num;
     char *ptr;
 
-#line 183 "y.tab.h" /* yacc.c:1909  */
-};
+#line 196 "y.tab.h"
 
+};
 typedef union YYSTYPE YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define YYSTYPE_IS_DECLARED 1
@@ -190,6 +203,8 @@ typedef union YYSTYPE YYSTYPE;
 
 extern YYSTYPE yylval;
 
+
 int yyparse (void);
+
 
 #endif /* !YY_YY_Y_TAB_H_INCLUDED  */

@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
@@ -37,7 +38,7 @@ struct { char *name; int minl, code; } icontype[] = {
   { "project", 1, WBPROJECT },
   { "tool", 1, WBTOOL },
 };
-#define NUM_ICONTYPES (sizeof(icontype)/sizeof(icontype[0]))
+#define NUM_ICONTYPES ((int)(sizeof(icontype)/sizeof(icontype[0])))
 
 typedef unsigned short pixval;
 typedef struct {
@@ -215,13 +216,13 @@ unsigned char *processicon(FILE *ifp, int floyd, pixel **mappixels,
   register int row, col, limitcol;
   register pixel *pP;
   int newcolors;
-  register int ind;
-  long* thisrerr;
-  long* nextrerr;
-  long* thisgerr;
-  long* nextgerr;
-  long* thisberr;
-  long* nextberr;
+  register int ind = 0;
+  long* thisrerr = NULL;
+  long* nextrerr = NULL;
+  long* thisgerr = NULL;
+  long* nextgerr = NULL;
+  long* thisberr = NULL;
+  long* nextberr = NULL;
   long* temperr;
   register long sr, sg, sb, err;
   int fs_direction, dscale;
@@ -290,7 +291,7 @@ unsigned char *processicon(FILE *ifp, int floyd, pixel **mappixels,
     }
     do {
       register int i, r2, g2, b2;
-      register long dist, newdist;
+      register long dist = 0, newdist;
 
       if ( floyd ) {
 	/* Use Floyd-Steinberg errors to adjust actual color. */

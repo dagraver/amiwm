@@ -16,7 +16,7 @@
 extern struct Library *XLibBase;
 #endif
 
-#define NO_ICON_POSITION	(0x80000000)
+#define NO_ICON_POSITION	(-0x7fffffff-1)
 
 extern Display *dpy;
 extern char *progname;
@@ -57,7 +57,7 @@ void redrawicon(Icon *i, Window w)
 	xgc.clip_x_origin = xgc.clip_y_origin = 4;
 	XChangeGC(dpy, scr->gc, GCClipXOrigin|GCClipYOrigin|GCClipMask, &xgc);
       }
-      if(d!=scr->depth) {
+      if((int)d!=scr->depth) {
 	XSetForeground(dpy, scr->gc, scr->dri.dri_Pens[SHADOWPEN]);
 	XSetBackground(dpy, scr->gc, scr->dri.dri_Pens[BACKGROUNDPEN]);
 	XCopyPlane(dpy, pm, i->window, scr->gc, 0, 0,
@@ -202,11 +202,12 @@ void adjusticon(Icon *i)
   for(i2=scr->icons; i2; i2=i2->next)
     if(i2->parent==i->parent && i2!=i && i2->mapped &&
        nx<i2->x+i2->width && nx+i->width>i2->x &&
-       ny<i2->y+i2->height+scr->lh+2 && ny+i->height+scr->lh+2>i2->y) {
+       (unsigned int)ny<i2->y+i2->height+scr->lh+2 &&
+       ny+i->height+scr->lh+2>(unsigned int)i2->y) {
       ny=i2->y+i2->height+scr->lh+4;
       if(ny+i->height+scr->lh+1>maxy) {
 	nx=i2->x+i2->width+5;
-	if(i->parent==scr->back && nx+i->width>maxx) {
+	if(i->parent==scr->back && (unsigned int)(nx+i->width)>maxx) {
 	  ny=maxy;
 	  break;
 	} else
@@ -217,9 +218,9 @@ void adjusticon(Icon *i)
     }
 
   if(i->parent==scr->back) {
-    if(nx+i->width>maxx)
+    if((unsigned int)(nx+i->width)>maxx)
       nx=maxx-i->width;
-    if(ny+i->height>maxy)
+    if((unsigned int)(ny+i->height)>maxy)
       ny=maxy-i->height;
     if(nx<0) nx=0;
     if(ny<scr->bh) ny=scr->bh;
@@ -545,7 +546,7 @@ void cleanupicons()
       qsort(icons, nicons, sizeof(*icons),
 	    (int (*)(const void *, const void *))cmp_iconpos);
       for(i=0; i<nicons; i++) {
-	if(i>i0 && y+icons[i]->height>scr->height-4-scr->lh) {
+	if(i>i0 && (unsigned int)(y+icons[i]->height)>scr->height-4-scr->lh) {
 	  placeicons(icons+i0, i-i0, x, mw);
 	  x+=mw+5;
 	  y=scr->bh+4;

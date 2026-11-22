@@ -33,15 +33,16 @@ BOOL Fault(LONG code, UBYTE *header, UBYTE *buffer, LONG len)
     *buffer++=' ';
     len-=hdlen+2;
   }
-  if(code>=MIN_ERRNO && code<MIN_ERRNO+sizeof(syserrmsg)/sizeof(syserrmsg[0])
+  if(code>=MIN_ERRNO &&
+     code<(LONG)(MIN_ERRNO+sizeof(syserrmsg)/sizeof(syserrmsg[0]))
      && syserrmsg[code-MIN_ERRNO]) {
-    if(len<strlen(syserrmsg[code-MIN_ERRNO])+1)
+    if(len<(LONG)strlen(syserrmsg[code-MIN_ERRNO])+1)
       return FALSE;
     strcpy((char *)buffer, syserrmsg[code-MIN_ERRNO]);
   } else {
     char number[6+4*sizeof(LONG)];
-    sprintf(number, "Error %ld", code);
-    if(len<strlen(number)+1)
+    sprintf(number, "Error %ld", (long)code);
+    if(len<(LONG)strlen(number)+1)
       return FALSE;
     strcpy((char *)buffer, number);
   }

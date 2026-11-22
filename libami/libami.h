@@ -173,8 +173,8 @@ struct DiskObject {
 struct Hook
 {
   struct MinNode h_MinNode;
-  ULONG	   (*h_Entry)();	/* assembler entry point */
-  ULONG	   (*h_SubEntry)();	/* often HLL entry point */
+  ULONG	   (*h_Entry)(struct Hook *, APTR, APTR);	/* assembler entry point */
+  ULONG	   (*h_SubEntry)(struct Hook *, APTR, APTR);	/* often HLL entry point */
   APTR	   h_Data;		/* owner specific	 */
 };
 

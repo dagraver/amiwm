@@ -11,7 +11,7 @@ int md_grabkey(int keycode, unsigned int modifiers)
   int pkt[2], res=-1;
   char *ptr=NULL;
   pkt[0]=keycode; pkt[1]=modifiers;
-  if(md_command(None, MCMD_ADD_KEYGRAB, pkt, sizeof(pkt), &ptr)>=sizeof(int))
+  if(md_command(None, MCMD_ADD_KEYGRAB, pkt, sizeof(pkt), &ptr)>=(int)sizeof(int))
     res=*((int*)ptr);
   if(ptr) free(ptr);
   return res;

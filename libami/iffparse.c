@@ -113,8 +113,7 @@ static ULONG __saveds __asm hllDispatch(register __a0 struct Hook *hook,
 					register __a2 APTR object,
 					register __a1 APTR message)
 {
-  return ((ULONG (*)(struct Hook *, APTR, APTR))hook->h_SubEntry)
-    (hook, object, message);
+  return hook->h_SubEntry(hook, object, message);
 }
 
 #endif

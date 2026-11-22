@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdint.h>
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
@@ -202,9 +203,9 @@ static struct Image *loadimage(FILE *f)
   if(!(im=malloc(imgsz+sizeof(struct Image))))
     return NULL;
   im->LeftEdge=le; im->TopEdge=te; im->Width=w; im->Height=h;
-  im->Depth=d; im->ImageData=(UWORD*)getu32(&p);
+  im->Depth=d; im->ImageData=(UWORD*)(uintptr_t)getu32(&p);
   im->PlanePick=*p++; im->PlaneOnOff=*p++;
-  im->NextImage=(struct Image *)getu32(&p);
+  im->NextImage=(struct Image *)(uintptr_t)getu32(&p);
   if(im->ImageData) {
     im->ImageData=(UWORD *)(im+1);
     fread(im->ImageData, 1, imgsz, f);
@@ -249,7 +250,7 @@ static LONG unpack_rle(unsigned char *src, LONG srclen, char *dst, LONG dstlen,
     }
   }
   if(src != srcn)
-    fprintf(stderr, "Warning:  Left %d bytes unused.\n", srcn-src);
+    fprintf(stderr, "Warning:  Left %td bytes unused.\n", srcn-src);
   return dst-dst0;
 }
 
@@ -330,7 +331,7 @@ static void decode_IMAG(unsigned char *buf, LONG len, int width, int height,
 static void decode_glowicon(struct DiskObject *diskobj, char *glow, LONG len)
 {
   int imgno=0, gotface=0;
-  struct { char width, height; UWORD dunno1, dunno2; } face;
+  struct { char width, height; UWORD dunno1, dunno2; } face = {0, 0, 0, 0};
   while(len>=8) {
     ULONG id = getu32(&glow);
     LONG clen = get32(&glow);
@@ -382,27 +383,27 @@ static struct DiskObject *int_load_do(char *filename)
 	free(diskobj);
 	return NULL;
       }
-      diskobj->do_Gadget.NextGadget=(struct Gadget *)getu32(&p);
+      diskobj->do_Gadget.NextGadget=(struct Gadget *)(uintptr_t)getu32(&p);
       diskobj->do_Gadget.LeftEdge=get16(&p);
       diskobj->do_Gadget.TopEdge=get16(&p);
       diskobj->do_Gadget.Width=get16(&p); diskobj->do_Gadget.Height=get16(&p);
       diskobj->do_Gadget.Flags=getu16(&p);
       diskobj->do_Gadget.Activation=getu16(&p);
       diskobj->do_Gadget.GadgetType=getu16(&p);
-      diskobj->do_Gadget.GadgetRender=(APTR)getu32(&p);
-      diskobj->do_Gadget.SelectRender=(APTR)getu32(&p);
-      diskobj->do_Gadget.GadgetText=(struct IntuiText *)getu32(&p);
+      diskobj->do_Gadget.GadgetRender=(APTR)(uintptr_t)getu32(&p);
+      diskobj->do_Gadget.SelectRender=(APTR)(uintptr_t)getu32(&p);
+      diskobj->do_Gadget.GadgetText=(struct IntuiText *)(uintptr_t)getu32(&p);
       diskobj->do_Gadget.MutualExclude=get32(&p);
-      diskobj->do_Gadget.SpecialInfo=(APTR)getu32(&p);
+      diskobj->do_Gadget.SpecialInfo=(APTR)(uintptr_t)getu32(&p);
       diskobj->do_Gadget.GadgetID=getu16(&p);
-      diskobj->do_Gadget.UserData=(APTR)getu32(&p);
+      diskobj->do_Gadget.UserData=(APTR)(uintptr_t)getu32(&p);
       diskobj->do_Type=*p; p+=2;
-      diskobj->do_DefaultTool=(char *)getu32(&p);
-      diskobj->do_ToolTypes=(char **)getu32(&p);
+      diskobj->do_DefaultTool=(char *)(uintptr_t)getu32(&p);
+      diskobj->do_ToolTypes=(char **)(uintptr_t)getu32(&p);
       diskobj->do_CurrentX=get32(&p);
       diskobj->do_CurrentY=get32(&p);
-      diskobj->do_DrawerData=(struct DrawerData *)getu32(&p);
-      diskobj->do_ToolWindow=(char *)getu32(&p);
+      diskobj->do_DrawerData=(struct DrawerData *)(uintptr_t)getu32(&p);
+      diskobj->do_ToolWindow=(char *)(uintptr_t)getu32(&p);
       diskobj->do_StackSize=get32(&p);
       
       if(diskobj->do_DrawerData) {
@@ -418,11 +419,11 @@ static struct DiskObject *int_load_do(char *filename)
 	  dd->dd_NewWindow.BlockPen=*p++;
 	  dd->dd_NewWindow.IDCMPFlags=getu32(&p);
 	  dd->dd_NewWindow.Flags=getu32(&p);
-	  dd->dd_NewWindow.FirstGadget=(struct Gadget *)getu32(&p);
-	  dd->dd_NewWindow.CheckMark=(struct Image *)getu32(&p);
-	  dd->dd_NewWindow.Title=(UBYTE *)getu32(&p);
-	  dd->dd_NewWindow.Screen=(struct Screen *)getu32(&p);
-	  dd->dd_NewWindow.BitMap=(struct BitMap *)getu32(&p);
+	  dd->dd_NewWindow.FirstGadget=(struct Gadget *)(uintptr_t)getu32(&p);
+	  dd->dd_NewWindow.CheckMark=(struct Image *)(uintptr_t)getu32(&p);
+	  dd->dd_NewWindow.Title=(UBYTE *)(uintptr_t)getu32(&p);
+	  dd->dd_NewWindow.Screen=(struct Screen *)(uintptr_t)getu32(&p);
+	  dd->dd_NewWindow.BitMap=(struct BitMap *)(uintptr_t)getu32(&p);
 	  dd->dd_NewWindow.MinWidth=get16(&p);
 	  dd->dd_NewWindow.MinHeight=get16(&p);
 	  dd->dd_NewWindow.MaxWidth=getu16(&p);
@@ -436,16 +437,14 @@ static struct DiskObject *int_load_do(char *filename)
       if(!(diskobj->do_Gadget.GadgetRender=loadimage(f)))
 	error++;
 	
-      if(diskobj->do_Gadget.Flags&2)
+      if(diskobj->do_Gadget.Flags&2) {
 	if(!(diskobj->do_Gadget.SelectRender=loadimage(f)))
 	  error++;
-	else ;
-      else if(diskobj->do_Gadget.Flags&1)
+      } else if(diskobj->do_Gadget.Flags&1) {
 	if(!(diskobj->do_Gadget.SelectRender=
 	     backfillimage((struct Image *)diskobj->do_Gadget.GadgetRender)))
 	  error++;
-	else ;
-      else diskobj->do_Gadget.SelectRender=NULL;
+      } else diskobj->do_Gadget.SelectRender=NULL;
       
       if(diskobj->do_DefaultTool)
 	if(!(diskobj->do_DefaultTool=loadstring(f)))
@@ -505,11 +504,12 @@ struct DiskObject *GetDefDiskObject(LONG def_type)
 
   if(def_type<WBDISK || def_type>WBAPPICON)
     return NULL;
-  if(!icondir)
+  if(!icondir) {
     if(!(icondir = get_current_icondir()))
       return NULL;
     else
       l = strlen(icondir);
+  }
 
 #ifdef HAVE_ALLOCA
   buf = alloca(l+18);

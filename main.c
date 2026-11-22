@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdint.h>
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
 #include <X11/cursorfont.h>
@@ -99,8 +100,8 @@ extern void menubar_enter(Window);
 extern void menubar_leave(Window);
 extern void *getitembyhotkey(KeySym);
 extern void menuaction(void *);
-extern void screentoback();
-extern void openscreen(char *, Window);
+extern void screentoback(void);
+extern Scrn *openscreen(char *, Window);
 extern void realizescreens(void);
 extern Scrn *getscreenbyroot(Window);
 extern void assimilate(Window, int, int);
@@ -245,7 +246,7 @@ void remove_fd_from_set(int fd)
   FD_CLR(fd, &master_fd_set);
 }
 
-void lookup_keysyms()
+void lookup_keysyms(void)
 {
   int i,j,k,maxsym,mincode,maxcode;
   XModifierKeymap *map=XGetModifierMapping(dpy);
@@ -663,7 +664,7 @@ void starticondragging(Scrn *scr, XEvent *e)
 		    CWBackPixmap|CWOverrideRedirect|CWSaveUnder|CWColormap,
 		    &xswa);
 #ifdef HAVE_XSHAPE
-    if(shape_extn)
+    if(shape_extn) {
       if(i->innerwin) {
 	int bShaped, xbs, ybs, cShaped, xcs, ycs;
 	unsigned int wbs, hbs, wcs, hcs;
@@ -676,6 +677,7 @@ void starticondragging(Scrn *scr, XEvent *e)
 	XShapeCombineMask(dpy, dragiconlist[numdragicons].w, ShapeBounding,
 			  0, 0, i->maskpm, ShapeSet);
       }
+    }
 #endif
     XMapRaised(dpy, dragiconlist[numdragicons].w);
     numdragicons++;
@@ -787,7 +789,7 @@ static void instcmap(Colormap c)
 
 void internal_broker(XEvent *e)
 {
-  int event_loc=(int)e->xany.display;
+  intptr_t event_loc=(intptr_t)e->xany.display;
   e->xany.display=dpy;
   if(event_loc==1) {
     XSendEvent(dpy, e->xany.window, False, 0, e);
@@ -796,7 +798,7 @@ void internal_broker(XEvent *e)
     if(e->xmapping.request==MappingKeyboard ||
        e->xmapping.request==MappingModifier)
       XRefreshKeyboardMapping(&e->xmapping);
-    lookup_keysyms(dpy, &meta_mask, &switch_mask);
+    lookup_keysyms();
     break;
   case KeyPress:
     if(e->xkey.state & meta_mask) {
@@ -895,7 +897,8 @@ int main(int argc, char *argv[])
   wm_curs=XCreateFontCursor(dpy, XC_top_left_arrow);
 
   FD_ZERO(&master_fd_set);
-  FD_SET((x_fd=ConnectionNumber(dpy)), &master_fd_set);
+  x_fd=ConnectionNumber(dpy);
+  FD_SET(x_fd, &master_fd_set);
   max_fd=x_fd+1;
 
   initting = 1;
@@ -931,7 +934,7 @@ int main(int argc, char *argv[])
     fprintf(stderr, "%s: child cannot disinherit TCP fd\n", progname);
 #endif
 
-  lookup_keysyms(dpy, &meta_mask, &switch_mask);
+  lookup_keysyms();
 
   for(sc=0; sc<ScreenCount(dpy); sc++)
     if(sc==DefaultScreen(dpy) || prefs.manage_all)
@@ -1148,7 +1151,7 @@ int main(int argc, char *argv[])
 	    Window r,p,*children;
 	    unsigned int nchildren;
 	    if(XQueryTree(dpy, scr->back, &r, &p, &children, &nchildren)) {
-	      int n;
+	      unsigned int n;
 	      for(n=0; n<nchildren; n++)
 		if((!XFindContext(dpy, children[n], client_context, (XPointer*)&c2)) &&
 		   children[n]==c2->parent)
@@ -1182,6 +1185,7 @@ int main(int argc, char *argv[])
 	  case WithdrawnState:
 	    if(c->parent == c->scr->root)
 	      reparent(c);
+	    /* fall through */
 	  case NormalState:
 	    XMapWindow(dpy, c->window);
 	    XMapRaised(dpy, c->parent);
@@ -1289,14 +1293,15 @@ int main(int argc, char *argv[])
 		XRaiseWindow(dpy, c->parent);
 	    }
 	    if(event.xbutton.window!=c->depth &&
-	       event.xbutton.window!=c->window)
+	       event.xbutton.window!=c->window) {
 	      if(c==doubleclient && (event.xbutton.time-last_double)<
-		 dblClickTime) {
+		 (Time)dblClickTime) {
 		XRaiseWindow(dpy, c->parent);
 	      } else {
 		doubleclient=c;
 		last_double=event.xbutton.time;
 	      }
+	    }
 	    if(event.xbutton.window==c->drag) {
 	      forcemoving=(prefs.forcemove==FM_ALWAYS) ||
 		(event.xbutton.state & ShiftMask);
@@ -1310,7 +1315,7 @@ int main(int argc, char *argv[])
 	      gadgetclicked(c, event.xbutton.window, &event);
 	  } else if(i && event.xbutton.window==i->window) {
 	    abortfocus();
-	    if(i->selected && (event.xbutton.time-last_icon_click)<dblClickTime) {
+	    if(i->selected && (event.xbutton.time-last_icon_click)<(Time)dblClickTime) {
 	      do_icon_double_click(i->scr);
 	    } else {
 	      if(!(event.xbutton.state & ShiftMask))
@@ -1330,7 +1335,7 @@ int main(int argc, char *argv[])
 	  else if(scr&&scr->back==event.xbutton.window) {
 	    abortfocus();
 	    startbounding(scr, scr->back, &event);
-	  } else ;
+	  } else { }
 	else if(event.xbutton.button==3) {
 	  if(rubberclient || boundingscr)
 	    abortrubber();

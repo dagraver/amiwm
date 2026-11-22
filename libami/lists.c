@@ -1,4 +1,5 @@
 #include "libami.h"
+#include <string.h>
 
 #ifndef AMIGAOS
 

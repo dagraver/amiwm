@@ -22,7 +22,7 @@ Window md_create_appicon(Window p, int x, int y, char *name,
   strcpy(nai->name, name);
   res=md_command(p, MCMD_CREATEAPPICON, nai, sizeof(struct NewAppIcon)+l,
 		 &data);
-  if(res<sizeof(w)) {
+  if(res<(int)sizeof(w)) {
     if(data) free(data);
 #ifndef HAVE_ALLOCA
     free(nai);

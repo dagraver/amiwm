@@ -64,7 +64,7 @@ static void getdriprop(Display *dpy, Atom atom, Atom typ, Window win,
   Atom atyp;
   int afmt;
   unsigned long nitems, extra;
-  int i,j,n;
+  unsigned long i,j,n;
   CARD32 *prop=NULL;
   if(XGetWindowProperty(dpy, win, atom, 0l, NUMDRIPENS+6, False, typ,
 			&atyp, &afmt, &nitems, &extra,
@@ -94,7 +94,7 @@ static void getdriprop(Display *dpy, Atom atom, Atom typ, Window win,
 	    n=nitems-i;
 	  if(n>0) {
 	    dri->dri_NumPens=n;
-	    if((dri->dri_Pens=calloc(sizeof(unsigned long), n)))
+	    if((dri->dri_Pens=calloc(n, sizeof(unsigned long))))
 	      for(j=0; j<n; j++)
 		dri->dri_Pens[j]=prop[i++];
 	  }
@@ -171,7 +171,7 @@ void init_dri(struct DrawInfo *dri, Display *dpy, Window root, Colormap cm,
   if(!dri->dri_Version)
     dri->dri_Version = DRI_VERSION;
   if(!dri->dri_Pens) {
-    if(!(dri->dri_Pens = calloc(sizeof(unsigned long), NUMDRIPENS))) {
+    if(!(dri->dri_Pens = calloc(NUMDRIPENS, sizeof(unsigned long)))) {
       fprintf(stderr, "%s: out of memory\n", progname);
       exit(1);
     }

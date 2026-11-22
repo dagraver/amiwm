@@ -33,15 +33,19 @@ static void k_rotscreens(Window w)
     md_rotate_screen(root);
 }
 
+static void k_back(Window w) { md_back(w); }
+static void k_front(Window w) { md_front(w); }
+static void k_iconify(Window w) { md_iconify(w); }
+
 typedef void (*mdfuncp)(Window);
 
 int parse_keyword(char *str, YYSTYPE *val)
 {
    struct { char *name; mdfuncp func; } functab[] = {
-     { "back", (mdfuncp)md_back },
-     { "front", (mdfuncp)md_front },
-     { "iconify", (mdfuncp)md_iconify },
-     { "rotatescreens", (mdfuncp)k_rotscreens },
+     { "back", k_back },
+     { "front", k_front },
+     { "iconify", k_iconify },
+     { "rotatescreens", k_rotscreens },
    };
 #define N_FUNC (sizeof(functab)/sizeof(functab[0]))
    struct { char *name; int token, num; } kwtab[] = {
@@ -105,6 +109,7 @@ int parse_keyword(char *str, YYSTYPE *val)
 }
 
 %}
+%option nounput noinput
 %%
 
 \#[^\n]*\n	{ ; }

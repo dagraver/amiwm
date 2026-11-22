@@ -323,11 +323,11 @@ void redraw_item(struct Item *i, Window w)
 #else
     XmbDrawImageString(dpy, w, scr->dri.dri_FontSet,
 		       scr->menubargc, x+scr->dri.dri_Ascent+1,
-		       1+scr->dri.dri_Ascent, "»", 1);
+		       1+scr->dri.dri_Ascent, "ï¿½", 1);
 #endif
 #else
     XDrawImageString(dpy, w, scr->menubargc, x+scr->dri.dri_Ascent+1,
-		     1+scr->dri.dri_Ascent, "»", 1);
+		     1+scr->dri.dri_Ascent, "ï¿½", 1);
 #endif
   } else if(i->hotkey) {
     int x=m->width-6-scr->hotkeyspace-1+8;
@@ -361,7 +361,7 @@ void redraw_item(struct Item *i, Window w)
 void createmenubar()
 {
   XSetWindowAttributes attr;
-  struct Menu *m, *sm1, *sm2, *sm3;
+  struct Menu *m, *sm1=NULL;
   struct ToolItem *ti;
   GC gc;
 
@@ -575,11 +575,12 @@ static void leave_item(struct Item *i, Window w)
 {
   if(i==activesubitem)
     activesubitem=NULL;
-  if(i==activeitem)
+  if(i==activeitem) {
     if(activesubmenu && i->sub==activesubmenu)
       return;
     else
       activeitem=NULL;
+  }
   XSetWindowBackground(dpy, i->win, scr->dri.dri_Pens[BARBLOCKPEN]);
   XClearWindow(dpy, i->win);
   redraw_item(i, i->win);    
@@ -719,6 +720,7 @@ void menuaction(struct Item *i, struct Item *si)
       break;
     case 1:
       spawn(BIN_PREFIX"config_util");
+      /* fall through */
     case 2:
       {
 	XSetWindowAttributes xswa;
@@ -829,7 +831,7 @@ void menu_off()
 	      activeclient->window:None));
     XUnmapWindow(dpy, scr->menubarparent);
     if(XQueryTree(dpy, scr->back, &r, &p, &children, &nchildren)) {
-      int n;
+      unsigned int n;
       Client *c2;
       for(n=0; n<nchildren; n++)
 	if((!XFindContext(dpy, children[n], client_context, (XPointer*)&c2)) &&
@@ -877,7 +879,7 @@ struct Item *getitembyhotkey(KeySym key)
       key-=0x20;
     for(m=scr->firstmenu; m; m=m->next)
       for(i=m->firstitem; i; i=i->next)
-	if(i->hotkey==key)
+	if((KeySym)i->hotkey==key)
 	  return i;
   }
   return NULL;

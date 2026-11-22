@@ -517,7 +517,7 @@ static Client *topmostmappedclient(Window *children, unsigned int nchildren)
 
 static Client *bottommostmappedclient(Window *children, unsigned int nchildren)
 {
-  int n;
+  unsigned int n;
   Client *c;
   for(n=0; n<nchildren; n++)
     if((!XFindContext(dpy, children[n], client_context, (XPointer*)&c)) &&

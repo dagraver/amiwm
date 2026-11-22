@@ -18,11 +18,13 @@ extern void create_module(Scrn *, char *, char *);
 extern char *default_colors[NUMDRIPENS];
 extern char *default_screenfont, *label_font_name;
 extern Display *dpy;
+int yylex(void);
+int yyerror(const char *s);
 #ifndef HAVE_ALLOCA
 #define alloca malloc
 #endif
 #ifndef HAVE_STRDUP
-char *strdup(s) char *s;
+char *strdup(const char *s)
 {
   char *ptr=(char *)malloc(strlen(s)+1);
   if(ptr) strcpy(ptr, s);
@@ -197,7 +199,7 @@ forcemove_policy : ALWAYS { $$ = FM_ALWAYS; }
 %%
 extern char *progname;
 extern int ParseError;
-int yyerror(s) char *s;
+int yyerror(const char *s)
 {
     fprintf (stderr, "%s: error in input file:  %s\n", progname, s ? s : "");
     ParseError = 1;

@@ -3,6 +3,9 @@
 #include <string.h>
 #include "libami.h"
 
+int yylex(void);
+int yyerror(const char *s);
+
 void docmd(XEvent *e, void *callback)
 {
   ((void (*)(Window))callback)(e->xany.window);
@@ -57,7 +60,7 @@ command			: FUNCTION { $$=$1; }
 
 char *progname;
 
-int yyerror(s) char *s;
+int yyerror(const char *s)
 {
     fprintf (stderr, "%s: error in input file:  %s\n", progname, s ? s : "");
     return 0;

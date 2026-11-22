@@ -5254,6 +5254,7 @@ else
   cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 
+#include <stdlib.h>
 int main()
 {
   union { int i; char c[sizeof(int)]; } v;
